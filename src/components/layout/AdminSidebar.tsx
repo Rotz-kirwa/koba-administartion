@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import {
   LayoutDashboard, BarChart3, Package, Warehouse, ShoppingCart,
-  Users, Tag, Star, CreditCard, Truck, Shield, FileText,
-  Headphones, UsersRound, Settings
+  Users, Tag, Star, CreditCard, Truck, FileText,
+  Headphones, Shield, Settings
 } from 'lucide-react';
 
 const menuItems = [
@@ -16,25 +17,38 @@ const menuItems = [
   { icon: Star, label: 'Reviews', path: '/admin/reviews' },
   { icon: CreditCard, label: 'Payments', path: '/admin/payments' },
   { icon: Truck, label: 'Shipping', path: '/admin/shipping' },
-  { icon: Shield, label: 'Compliance', path: '/admin/compliance' },
   { icon: FileText, label: 'Content', path: '/admin/content' },
   { icon: Headphones, label: 'Support', path: '/admin/support' },
-  { icon: UsersRound, label: 'Team', path: '/admin/team' },
+  { icon: Shield, label: 'Admins', path: '/admin/admins' },
   { icon: Settings, label: 'Settings', path: '/admin/settings' },
 ];
 
 export default function AdminSidebar() {
   const location = useLocation();
+  const { user } = useAdminAuth();
+  const isSuperAdmin = user?.role === 'super_admin';
+
+  // Filter menu items based on role
+  const visibleMenuItems = menuItems.filter(item => {
+    if (item.path === '/admin/admins') {
+      return isSuperAdmin;
+    }
+    return true;
+  });
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen overflow-y-auto">
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-2xl font-serif text-[#8B6F47]">Queen Koba</h1>
-        <p className="text-xs text-gray-500 mt-1">Admin Dashboard</p>
+        <img 
+          src="https://i.pinimg.com/736x/10/9e/e3/109ee385971d50218b28256a0073873c.jpg" 
+          alt="Queen Koba" 
+          className="w-full h-auto rounded-lg mb-2"
+        />
+        <p className="text-xs text-gray-500 text-center">Admin Dashboard</p>
       </div>
       
       <nav className="flex-1 p-4 space-y-1">
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
           

@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { Search, Mail, MapPin, ShoppingBag } from 'lucide-react';
+import { Search, Mail, MapPin, ShoppingBag, Users, TrendingUp, Eye, X } from 'lucide-react';
 import { api } from '../lib/api';
 import { useState } from 'react';
 
 export default function Customers() {
   const [search, setSearch] = useState('');
+  const [viewingCustomer, setViewingCustomer] = useState<any>(null);
   
   const { data, isLoading } = useQuery({
     queryKey: ['customers'],
@@ -17,16 +18,40 @@ export default function Customers() {
     c.username?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const totalCustomers = customers.length;
+  const activeCustomers = customers.filter((c: any) => c.orders?.length > 0).length;
+  const totalRevenue = customers.reduce((sum: number, c: any) => sum + (c.total_spent || 0), 0);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-serif text-gray-900">Customers</h1>
-          <p className="text-gray-500 mt-1">Manage your customer base</p>
+      <div>
+        <h1 className="text-3xl font-serif text-gray-900">Customers</h1>
+        <p className="text-gray-500 mt-1">Manage your customer base</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="admin-card p-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-500">Total Customers</span>
+            <Users className="w-5 h-5 text-blue-600" />
+          </div>
+          <p className="text-3xl font-bold">{totalCustomers}</p>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold text-[#8B6F47]">{customers.length}</div>
-          <div className="text-sm text-gray-500">Total Customers</div>
+        
+        <div className="admin-card p-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-500">Active Customers</span>
+            <ShoppingBag className="w-5 h-5 text-green-600" />
+          </div>
+          <p className="text-3xl font-bold text-green-600">{activeCustomers}</p>
+        </div>
+        
+        <div className="admin-card p-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-500">Total Revenue</span>
+            <TrendingUp className="w-5 h-5 text-[#8B6F47]" />
+          </div>
+          <p className="text-3xl font-bold text-[#8B6F47]">${totalRevenue.toFixed(2)}</p>
         </div>
       </div>
 
@@ -57,6 +82,7 @@ export default function Customers() {
                   <th className="text-left py-3 px-4 font-semibold text-sm">Orders</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Total Spent</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Joined</th>
+                  <th className="text-right py-3 px-4 font-semibold text-sm">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -97,6 +123,16 @@ export default function Customers() {
                     <td className="py-4 px-4 text-sm text-gray-500">
                       {new Date(customer.created_at).toLocaleDateString()}
                     </td>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center justify-end">
+                        <button 
+                          onClick={() => setViewingCustomer(customer)}
+                          className="p-2 hover:bg-gray-100 rounded-lg"
+                        >
+                          <Eye className="w-4 h-4 text-gray-600" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -104,6 +140,74 @@ export default function Customers() {
           </div>
         )}
       </div>
+
+      {viewingCustomer && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Customer Details</h2>
+              <button onClick={() => setViewingCustomer(null)}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 pb-4 border-b">
+                <div className="w-16 h-16 bg-[#8B6F47] rounded-full flex items-center justify-center text-white text-2xl font-semibold">
+                  {viewingCustomer.username?.[0]?.toUpperCase() || 'U'}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold">{viewingCustomer.username}</h3>
+                  <p className="text-sm text-gray-500">{viewingCustomer.email}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-gray-500">Country</label>
+                  <p className="font-semibold">{viewingCustomer.country}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Preferred Currency</label>
+                  <p className="font-semibold">{viewingCustomer.preferred_currency || 'KES'}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Total Orders</label>
+                  <p className="font-semibold">{viewingCustomer.orders?.length || 0}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Total Spent</label>
+                  <p className="font-semibold text-[#8B6F47]">${viewingCustomer.total_spent?.toFixed(2) || '0.00'}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Member Since</label>
+                  <p className="font-semibold">{new Date(viewingCustomer.created_at).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Role</label>
+                  <p className="font-semibold capitalize">{viewingCustomer.role}</p>
+                </div>
+              </div>
+
+              {viewingCustomer.cart && viewingCustomer.cart.length > 0 && (
+                <div className="border-t pt-4">
+                  <h3 className="font-semibold mb-2">Current Cart</h3>
+                  <div className="space-y-2">
+                    {viewingCustomer.cart.map((item: any, idx: number) => (
+                      <div key={idx} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <div>
+                          <p className="font-medium">Product ID: {item.product_id}</p>
+                          <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

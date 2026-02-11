@@ -1,4 +1,22 @@
 import { BarChart3, TrendingUp, Users, DollarSign } from 'lucide-react';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
+
+const revenueData = [
+  { month: 'Jan', revenue: 0, orders: 0 },
+  { month: 'Feb', revenue: 0, orders: 0 },
+  { month: 'Mar', revenue: 0, orders: 0 },
+  { month: 'Apr', revenue: 0, orders: 0 },
+  { month: 'May', revenue: 0, orders: 0 },
+  { month: 'Jun', revenue: 0, orders: 0 },
+];
+
+const salesByProduct = [
+  { name: 'Clarifier Cream', sales: 0 },
+  { name: 'Clarifier Serum', sales: 0 },
+  { name: 'Clarifying Mask', sales: 0 },
+  { name: 'Clarifying Cleanser', sales: 0 },
+  { name: 'Clarifying Toner', sales: 0 },
+];
 
 export default function Analytics() {
   return (
@@ -11,8 +29,8 @@ export default function Analytics() {
             <span className="text-sm text-gray-500">Revenue (30d)</span>
             <DollarSign className="w-5 h-5 text-[#8B6F47]" />
           </div>
-          <p className="text-3xl font-bold">$12,450</p>
-          <p className="text-sm text-green-600 mt-2">+18.2% from last month</p>
+          <p className="text-3xl font-bold">$0</p>
+          <p className="text-sm text-gray-500 mt-2">No data yet</p>
         </div>
         
         <div className="admin-card p-6">
@@ -20,8 +38,8 @@ export default function Analytics() {
             <span className="text-sm text-gray-500">Orders</span>
             <BarChart3 className="w-5 h-5 text-[#8B6F47]" />
           </div>
-          <p className="text-3xl font-bold">342</p>
-          <p className="text-sm text-green-600 mt-2">+12.5% from last month</p>
+          <p className="text-3xl font-bold">0</p>
+          <p className="text-sm text-gray-500 mt-2">No data yet</p>
         </div>
         
         <div className="admin-card p-6">
@@ -29,8 +47,8 @@ export default function Analytics() {
             <span className="text-sm text-gray-500">Customers</span>
             <Users className="w-5 h-5 text-[#8B6F47]" />
           </div>
-          <p className="text-3xl font-bold">1,248</p>
-          <p className="text-sm text-green-600 mt-2">+8.3% from last month</p>
+          <p className="text-3xl font-bold">0</p>
+          <p className="text-sm text-gray-500 mt-2">No data yet</p>
         </div>
         
         <div className="admin-card p-6">
@@ -38,16 +56,51 @@ export default function Analytics() {
             <span className="text-sm text-gray-500">Avg Order Value</span>
             <TrendingUp className="w-5 h-5 text-[#8B6F47]" />
           </div>
-          <p className="text-3xl font-bold">$36.40</p>
-          <p className="text-sm text-green-600 mt-2">+5.1% from last month</p>
+          <p className="text-3xl font-bold">$0</p>
+          <p className="text-sm text-gray-500 mt-2">No data yet</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="admin-card p-6">
+          <h3 className="font-semibold text-lg mb-4">Revenue Trend</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={revenueData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Area type="monotone" dataKey="revenue" stroke="#8B6F47" fill="#8B6F47" fillOpacity={0.6} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="admin-card p-6">
+          <h3 className="font-semibold text-lg mb-4">Orders Trend</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={revenueData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="orders" stroke="#8B6F47" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
       <div className="admin-card p-6">
-        <h3 className="font-semibold text-lg mb-4">Revenue Trend</h3>
-        <div className="h-64 flex items-center justify-center text-gray-400">
-          Chart visualization would go here
-        </div>
+        <h3 className="font-semibold text-lg mb-4">Sales by Product</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={salesByProduct}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="sales" fill="#8B6F47" />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

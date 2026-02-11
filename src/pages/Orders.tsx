@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { Search, Eye, Package } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Search, Eye, Package, X, CheckCircle, XCircle, Truck } from 'lucide-react';
 import { api } from '../lib/api';
 import { useState } from 'react';
 
@@ -14,19 +14,37 @@ const statusColors: Record<string, string> = {
 export default function Orders() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [viewingOrder, setViewingOrder] = useState<any>(null);
+  const queryClient = useQueryClient();
   
   const { data, isLoading } = useQuery({
     queryKey: ['orders'],
     queryFn: api.getOrders,
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => 
+      api.updateOrderStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+  });
+
   const orders = data?.orders || [];
   const filteredOrders = orders.filter((o: any) => {
     const matchesSearch = o.order_id?.toLowerCase().includes(search.toLowerCase()) ||
                          o.customer_email?.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || o.order_status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const handleStatusUpdate = (orderId: string, status: string) => {
+    updateStatusMutation.mutate({ id: orderId, status });
+  };
+
+  const pendingOrders = orders.filter((o: any) => o.order_status === 'pending' || o.order_status === 'processing').length;
+  const completedOrders = orders.filter((o: any) => o.order_status === 'delivered').length;
+  const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.total_usd || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -35,9 +53,31 @@ export default function Orders() {
           <h1 className="text-3xl font-serif text-gray-900">Orders</h1>
           <p className="text-gray-500 mt-1">Manage customer orders</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Package className="w-5 h-5 text-[#8B6F47]" />
-          <span className="font-semibold">{orders.length} Total Orders</span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="admin-card p-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-500">Total Orders</span>
+            <Package className="w-5 h-5 text-blue-600" />
+          </div>
+          <p className="text-3xl font-bold">{orders.length}</p>
+        </div>
+        
+        <div className="admin-card p-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-500">Pending</span>
+            <Truck className="w-5 h-5 text-yellow-600" />
+          </div>
+          <p className="text-3xl font-bold text-yellow-600">{pendingOrders}</p>
+        </div>
+        
+        <div className="admin-card p-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-500">Total Revenue</span>
+            <CheckCircle className="w-5 h-5 text-green-600" />
+          </div>
+          <p className="text-3xl font-bold text-green-600">${totalRevenue.toFixed(2)}</p>
         </div>
       </div>
 
@@ -93,16 +133,27 @@ export default function Orders() {
                     <td className="py-4 px-4">{order.items?.length || 0} items</td>
                     <td className="py-4 px-4 font-semibold">${order.total_usd?.toFixed(2)}</td>
                     <td className="py-4 px-4">
-                      <span className={`px-2 py-1 text-xs rounded-full ${statusColors[order.status] || 'bg-gray-100 text-gray-800'}`}>
-                        {order.status || 'pending'}
-                      </span>
+                      <select
+                        value={order.order_status || 'pending'}
+                        onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
+                        className={`px-2 py-1 text-xs rounded-full border-0 ${statusColors[order.order_status] || 'bg-gray-100 text-gray-800'}`}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
                     </td>
                     <td className="py-4 px-4 text-sm text-gray-500">
                       {new Date(order.created_at).toLocaleDateString()}
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 hover:bg-gray-100 rounded-lg">
+                        <button 
+                          onClick={() => setViewingOrder(order)}
+                          className="p-2 hover:bg-gray-100 rounded-lg"
+                        >
                           <Eye className="w-4 h-4 text-gray-600" />
                         </button>
                       </div>
@@ -114,6 +165,74 @@ export default function Orders() {
           </div>
         )}
       </div>
+
+      {viewingOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Order Details</h2>
+              <button onClick={() => setViewingOrder(null)}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-gray-500">Order ID</label>
+                  <p className="font-mono font-semibold">{viewingOrder.order_id}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Date</label>
+                  <p className="font-semibold">{new Date(viewingOrder.created_at).toLocaleString()}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Status</label>
+                  <p className="font-semibold capitalize">{viewingOrder.order_status}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">Payment Status</label>
+                  <p className="font-semibold capitalize">{viewingOrder.payment_status}</p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-2">Items</h3>
+                <div className="space-y-2">
+                  {viewingOrder.items?.map((item: any, idx: number) => (
+                    <div key={idx} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                      <div>
+                        <p className="font-medium">{item.product_name}</p>
+                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                      </div>
+                      <p className="font-semibold">${item.item_total?.toFixed(2)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-semibold">Total</span>
+                  <span className="text-2xl font-bold text-[#8B6F47]">${viewingOrder.total_usd?.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {viewingOrder.shipping_address && (
+                <div className="border-t pt-4">
+                  <h3 className="font-semibold mb-2">Shipping Address</h3>
+                  <div className="text-sm text-gray-600">
+                    <p>{viewingOrder.shipping_address.name}</p>
+                    <p>{viewingOrder.shipping_address.address}</p>
+                    <p>{viewingOrder.shipping_address.city}, {viewingOrder.shipping_address.country}</p>
+                    <p>{viewingOrder.shipping_address.phone}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

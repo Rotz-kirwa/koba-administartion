@@ -9,7 +9,7 @@ import Products from './pages/Products';
 import Orders from './pages/Orders';
 import Customers from './pages/Customers';
 import Inventory from './pages/Inventory';
-import { Promotions, Reviews, Payments, Shipping, Compliance, Content, Support, Team, Settings } from './pages/OtherPages';
+import { Promotions, Reviews, Payments, Shipping, Content, Support, Admins, Settings } from './pages/OtherPages';
 
 const queryClient = new QueryClient();
 
@@ -47,10 +47,9 @@ function App() {
               <Route path="reviews" element={<Reviews />} />
               <Route path="payments" element={<Payments />} />
               <Route path="shipping" element={<Shipping />} />
-              <Route path="compliance" element={<Compliance />} />
               <Route path="content" element={<Content />} />
               <Route path="support" element={<Support />} />
-              <Route path="team" element={<Team />} />
+              <Route path="admins" element={<Admins />} />
               <Route path="settings" element={<Settings />} />
             </Route>
             <Route path="*" element={<Navigate to="/admin" />} />

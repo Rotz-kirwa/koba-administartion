@@ -40,6 +40,26 @@ export const api = {
     return res.json();
   },
 
+  updateProduct: async (id: string, data: any) => {
+    const res = await fetch(`${API_URL}/admin/products/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+
+  deleteProduct: async (id: string) => {
+    const res = await fetch(`${API_URL}/admin/products/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    return res.json();
+  },
+
   getOrders: async (params?: any) => {
     const query = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/admin/orders?${query}`, {
