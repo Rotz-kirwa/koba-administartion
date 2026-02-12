@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Eye, Package, X, CheckCircle, XCircle, Truck } from 'lucide-react';
+import { Search, Eye, Package, X, CheckCircle, Truck } from 'lucide-react';
 import { api } from '../lib/api';
 import { useState } from 'react';
 
@@ -43,7 +43,7 @@ export default function Orders() {
   };
 
   const pendingOrders = orders.filter((o: any) => o.order_status === 'pending' || o.order_status === 'processing').length;
-  const completedOrders = orders.filter((o: any) => o.order_status === 'delivered').length;
+  // const completedOrders = orders.filter((o: any) => o.order_status === 'delivered').length;
   const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.total_usd || 0), 0);
 
   return (

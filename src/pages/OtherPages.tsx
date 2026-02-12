@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Tag, Percent, Calendar, X, Star, CheckCircle, XCircle, MessageSquare, Shield, UserX, Edit, Lock, Bell, Database, Globe, Eye, EyeOff } from 'lucide-react';
+import { Plus, Trash2, Tag, Percent, Calendar, X, Star, CheckCircle, XCircle, MessageSquare, Shield, Edit, Lock, Bell, Database, Eye, EyeOff } from 'lucide-react';
 import { useAdminAuth } from '../context/AdminAuthContext';
 
 const API_URL = 'http://localhost:5000';
@@ -116,7 +116,7 @@ export function Promotions() {
             <span className="text-sm text-gray-500">Active Promotions</span>
             <Tag className="w-5 h-5 text-green-600" />
           </div>
-          <p className="text-3xl font-bold">{promotions.filter(p => p.status === 'active').length}</p>
+          <p className="text-3xl font-bold">{promotions.filter((p: any) => p.status === 'active').length}</p>
         </div>
         
         <div className="admin-card p-6">
@@ -124,7 +124,7 @@ export function Promotions() {
             <span className="text-sm text-gray-500">Total Uses</span>
             <Percent className="w-5 h-5 text-blue-600" />
           </div>
-          <p className="text-3xl font-bold">{promotions.reduce((sum, p) => sum + p.uses, 0)}</p>
+          <p className="text-3xl font-bold">{promotions.reduce((sum: number, p: any) => sum + (p.uses || 0), 0)}</p>
         </div>
         
         <div className="admin-card p-6">

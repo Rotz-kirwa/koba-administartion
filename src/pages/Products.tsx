@@ -37,7 +37,16 @@ export default function Products() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setAddingProduct(false);
-      setNewProduct({ name: '', description: '', category: 'Cream', kes_price: '', in_stock: true, image_url: '' });
+      setNewProduct({ 
+        name: '', 
+        description: '', 
+        category: 'Cream', 
+        kes_price: '', 
+        in_stock: true, 
+        image_url: '',
+        discount_percentage: 0,
+        on_sale: false
+      });
     },
   });
 
