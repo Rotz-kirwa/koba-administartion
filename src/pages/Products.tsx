@@ -14,6 +14,8 @@ export default function Products() {
     kes_price: '',
     in_stock: true,
     image_url: '',
+    discount_percentage: 0,
+    on_sale: false,
   });
   const queryClient = useQueryClient();
   
@@ -98,6 +100,9 @@ export default function Products() {
         category: editingProduct.category,
         in_stock: editingProduct.in_stock,
         prices: updatedPrices,
+        image_url: editingProduct.image_url,
+        discount_percentage: editingProduct.discount_percentage || 0,
+        on_sale: editingProduct.on_sale || false
       },
     });
   };
@@ -127,6 +132,8 @@ export default function Products() {
       base_price_usd: Math.round((kesAmount / 128.5) * 100) / 100,
       prices: prices,
       image_url: newProduct.image_url || '/images/product.jpg',
+      discount_percentage: newProduct.discount_percentage || 0,
+      on_sale: newProduct.on_sale || false,
     });
   };
 
@@ -260,6 +267,40 @@ export default function Products() {
               </div>
               
               <div>
+                <label className="block text-sm font-medium mb-1">Discount (%)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={editingProduct.discount_percentage || 0}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, discount_percentage: Number(e.target.value) })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Image URL</label>
+                <input
+                  type="text"
+                  value={editingProduct.image_url || ''}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, image_url: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+              
+              <div>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editingProduct.on_sale}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, on_sale: e.target.checked })}
+                  />
+                  <span className="text-sm font-medium">On Sale</span>
+                </label>
+              </div>
+              
+              <div>
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -379,8 +420,32 @@ export default function Products() {
                   className="w-full px-3 py-2 border rounded-lg text-sm"
                 />
                 {newProduct.image_url && (
-                  <img src={newProduct.image_url} alt="Preview" className="mt-2 w-full h-32 object-cover rounded" />
+                  <img src={newProduct.image_url} alt="Preview" className="mt-2 w-full h-64 object-cover rounded" />
                 )}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Discount (%)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={newProduct.discount_percentage || 0}
+                  onChange={(e) => setNewProduct({ ...newProduct, discount_percentage: Number(e.target.value) })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="0"
+                />
+              </div>
+              
+              <div>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={newProduct.on_sale || false}
+                    onChange={(e) => setNewProduct({ ...newProduct, on_sale: e.target.checked })}
+                  />
+                  <span className="text-sm font-medium">On Sale</span>
+                </label>
               </div>
               
               <div>

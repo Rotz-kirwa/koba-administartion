@@ -78,6 +78,7 @@ export default function Customers() {
                 <tr className="border-b border-gray-200">
                   <th className="text-left py-3 px-4 font-semibold text-sm">Customer</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Email</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Phone</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Country</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Orders</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Total Spent</th>
@@ -104,6 +105,9 @@ export default function Customers() {
                         <Mail className="w-4 h-4 text-gray-400" />
                         {customer.email}
                       </div>
+                    </td>
+                    <td className="py-4 px-4 text-sm">
+                      {customer.phone || 'N/A'}
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2 text-sm">
@@ -163,6 +167,10 @@ export default function Customers() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-gray-500">Phone</label>
+                  <p className="font-semibold">{viewingCustomer.phone || 'Not provided'}</p>
+                </div>
                 <div>
                   <label className="text-sm text-gray-500">Country</label>
                   <p className="font-semibold">{viewingCustomer.country}</p>

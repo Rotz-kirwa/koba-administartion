@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Tag, Percent, Calendar, X, Star, CheckCircle, XCircle, MessageSquare, Shield, UserX, Edit, Lock, Bell, Database, Globe } from 'lucide-react';
+import { Plus, Trash2, Tag, Percent, Calendar, X, Star, CheckCircle, XCircle, MessageSquare, Shield, UserX, Edit, Lock, Bell, Database, Globe, Eye, EyeOff } from 'lucide-react';
 import { useAdminAuth } from '../context/AdminAuthContext';
 
 const API_URL = 'http://localhost:5000';
@@ -1864,6 +1864,9 @@ export function Settings() {
     newPassword: '',
     confirmPassword: ''
   });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [notifications, setNotifications] = useState({
     emailOrders: true,
     emailSupport: true,
@@ -1877,12 +1880,40 @@ export function Settings() {
     requireEmailVerification: false
   });
 
-  const handleProfileUpdate = () => {
+  const handleProfileUpdate = async () => {
     if (profile.newPassword && profile.newPassword !== profile.confirmPassword) {
       alert('Passwords do not match');
       return;
     }
-    alert('Profile updated successfully');
+    
+    if (profile.newPassword && !profile.currentPassword) {
+      alert('Please enter your current password');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_URL}/admin/profile/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getToken()}`
+        },
+        body: JSON.stringify({
+          current_password: profile.currentPassword,
+          new_password: profile.newPassword
+        })
+      });
+      
+      if (response.ok) {
+        alert('Password updated successfully');
+        setProfile({ ...profile, currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to update password');
+      }
+    } catch (error) {
+      alert('Failed to update password');
+    }
   };
 
   const handleNotificationsUpdate = () => {
@@ -1984,33 +2015,60 @@ export function Settings() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Current Password</label>
-                <input
-                  type="password"
-                  value={profile.currentPassword}
-                  onChange={(e) => setProfile({ ...profile, currentPassword: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={profile.currentPassword}
+                    onChange={(e) => setProfile({ ...profile, currentPassword: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg pr-10"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">New Password</label>
-                <input
-                  type="password"
-                  value={profile.newPassword}
-                  onChange={(e) => setProfile({ ...profile, newPassword: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={profile.newPassword}
+                    onChange={(e) => setProfile({ ...profile, newPassword: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg pr-10"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Confirm New Password</label>
-                <input
-                  type="password"
-                  value={profile.confirmPassword}
-                  onChange={(e) => setProfile({ ...profile, confirmPassword: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={profile.confirmPassword}
+                    onChange={(e) => setProfile({ ...profile, confirmPassword: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg pr-10"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
